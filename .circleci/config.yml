@@ -6,17 +6,8 @@ jobs:
     working_directory: ~/repo
     steps:
       - checkout
-      - restore_cache:
-          keys:
-            - v1-dependencies-{{ checksum "package.json" }}
-            # fallback to using the latest cache if no exact match is found
-            - v1-dependencies-
       - run: yarn install
       # - run: yarn run prod
-      - save_cache:
-          paths:
-            - node_modules
-          key: v1-dependencies-{{ checksum "package.json" }}
       - persist_to_workspace:
           root: .
           paths: [ '*' ]
@@ -29,12 +20,9 @@ jobs:
     steps:
       - attach_workspace:
           at: .
-      #      - checkout
       - run:
           name: Deploy to S3 if branch is Master.
-          command: aws s3 sync ~/repo s3://${AWS_S3_BUCKET_NAME}/ --exact-timestamps --delete --exclude=".git/*" --exclude=".circleci/*"
-#          command: aws s3 sync . s3://${AWS_S3_BUCKET_NAME}/ --exact-timestamps --delete
-
+          command: aws s3 sync . s3://${AWS_S3_BUCKET_NAME}/ --exact-timestamps --delete --exclude=".git/*" --exclude=".circleci/*"
 
 workflows:
   version: 2
